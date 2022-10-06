@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 df=pd.read_csv('driver_avgPos_circuit.csv')
@@ -8,8 +7,10 @@ df=pd.read_csv('driver_avgPos_circuit.csv')
 df.loc[df['driverRef']=='max_verstappen', 'pilot'] = 'verstappen'
 
 fig, axes = plt.subplots(figsize=(15,5))
-sns.lineplot(data=df, x='location', y='media', hue='driverRef')
-sns.scatterplot(data=df, x='location', y='media', hue='driverRef', size='somma', sizes=(50,400), legend=False)
+for pil in df.driverRef.unique():
+    d = df.loc[df['driverRef']==pil]
+    plt.plot(d.location, d.media, label=pil)
+    plt.scatter(d.location, d.media, s=2*d.somma**2, linewidths=1, edgecolors='xkcd:steel grey')
 axes.invert_yaxis()
 axes.set_facecolor('k')
 axes.xaxis.grid()

@@ -23,6 +23,7 @@ sprint_results = pd.read_csv(df_path + 'sprint_results.csv')
 status = pd.read_csv(df_path + 'status.csv')
 
 err = 'non disponibile per questa stagione :('
+#st.error(err, icon=None)
 
 def timeConverter(stringa):
   try:
@@ -70,7 +71,6 @@ d_wq = d.loc[(d['year']==anno) & ((d['n_wins']>0) | (d['n_poles']>0))].groupby('
 
 st.header('Totale vittorie e pole positions per pilota e stagione')
 st.bar_chart(d_wq[['n_wins', 'n_poles']])
-st.error(err, icon=None)
 
 d_avg = d.loc[(d['year']==anno)].groupby('driverRef').sum()#.reset_index()
 
@@ -108,26 +108,28 @@ for i,nome in enumerate(d_avg.driverRef):
 st.pyplot(fig=fig, clear_figure=True)
 
 d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
+try:
+    fig2, axes = plt.subplots(figsize=(20,10))
+    w = d_gr.loc[d_gr['year']==anno]
+    palette = sns.color_palette('rocket_r', n_colors=30)
 
-fig2, axes = plt.subplots(figsize=(20,10))
-w = d_gr.loc[d_gr['year']==anno]
-palette = sns.color_palette('rocket_r', n_colors=30)
+    for i,pil in enumerate(w.driverRef.unique()):
+        k = w.loc[w['driverRef']==pil]
+        axes.plot(k.raceId, k.position_championship, label=pil, 
+                linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
+        plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
 
-for i,pil in enumerate(w.driverRef.unique()):
-    k = w.loc[w['driverRef']==pil]
-    axes.plot(k.raceId, k.position_championship, label=pil, 
-              linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
-    plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
+    axes.set_facecolor('k')
+    fig2.set_facecolor('k')
+    axes.xaxis.grid(linewidth=.5)
+    axes.invert_yaxis()
+    axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
 
-axes.set_facecolor('k')
-fig2.set_facecolor('k')
-axes.xaxis.grid(linewidth=.5)
-axes.invert_yaxis()
-axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
-
-axes.xaxis.label.set_color('w')
-axes.yaxis.label.set_color('w')
-axes.tick_params(axis='y', colors='w')
+    axes.xaxis.label.set_color('w')
+    axes.yaxis.label.set_color('w')
+    axes.tick_params(axis='y', colors='w')
+except:
+    st.error(err, icon=None)
 
 st.header('andamento stagionale della classifica')
 st.pyplot(fig=fig2, clear_figure=True)

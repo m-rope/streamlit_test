@@ -51,7 +51,7 @@ driver_df = results.loc[:, ['raceId', 'driverId', 'laps', 'fastestLapTime', 'pos
 driver_df.loc[:, 'fastestLapTime'] = [timeConverter(x) for x in driver_df['fastestLapTime']]
 
 
-anno = st.sidebar.slider('Seleziona stagione', driver_df.year.min(), driver_df.year.max(), 2022)
+anno = st.sidebar.slider('Seleziona stagione', int(driver_df.year.min()), int(driver_df.year.max()), int(2022))
 
 driver_df.loc[:, 'poles'] = [1 if x==1 else 0 for x in driver_df['position_quali']]
 driver_df.loc[:, 'wins'] = [1 if x==1 else 0 for x in driver_df['positionOrder']]

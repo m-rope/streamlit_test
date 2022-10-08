@@ -58,7 +58,7 @@ driver_df.loc[:, 'fastestLapTime'] = [timeConverter(x) for x in driver_df['faste
 #                ('Totale vittorie', 'Piazzamento medio gara', 'Piazzamento medio qualifiche'),
 #                )
 
-anno = st.sidebar.slider('Seleziona stagione', driver_df.year.min(), driver_df.year.max(), 1967)
+anno = st.sidebar.slider('Seleziona stagione', driver_df.year.min(), driver_df.year.max(), min([1967]))
 
 driver_df.loc[:, 'poles'] = [1 if x==1 else 0 for x in driver_df['position_quali']]
 driver_df.loc[:, 'wins'] = [1 if x==1 else 0 for x in driver_df['positionOrder']]

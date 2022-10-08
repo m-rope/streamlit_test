@@ -107,18 +107,19 @@ for i,nome in enumerate(d_avg.driverRef):
 
 st.pyplot(fig=fig, clear_figure=True)
 
+st.header('andamento stagionale della classifica')
 d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
+
+fig2, axes = plt.subplots(figsize=(20,10))
+w = d_gr.loc[d_gr['year']==anno]
+palette = sns.color_palette('rocket_r', n_colors=30)
+
+for i,pil in enumerate(w.driverRef.unique()):
+    k = w.loc[w['driverRef']==pil]
+    axes.plot(k.raceId, k.position_championship, label=pil, 
+            linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
+    plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
 try:
-    fig2, axes = plt.subplots(figsize=(20,10))
-    w = d_gr.loc[d_gr['year']==anno]
-    palette = sns.color_palette('rocket_r', n_colors=30)
-
-    for i,pil in enumerate(w.driverRef.unique()):
-        k = w.loc[w['driverRef']==pil]
-        axes.plot(k.raceId, k.position_championship, label=pil, 
-                linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
-        plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
-
     axes.set_facecolor('k')
     fig2.set_facecolor('k')
     axes.xaxis.grid(linewidth=.5)
@@ -131,7 +132,7 @@ try:
 except:
     st.error(err, icon=None)
 
-st.header('andamento stagionale della classifica')
+
 st.pyplot(fig=fig2, clear_figure=True)
 
 dr = driver_df.groupby('driverRef').agg(n_wins=('wins', 'sum'),

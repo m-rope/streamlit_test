@@ -125,6 +125,7 @@ axes.xaxis.label.set_color('w')
 axes.yaxis.label.set_color('w')
 axes.tick_params(axis='y', colors='w')
 
+st.header('andamento stagionale della classifica')
 st.pyplot(fig=fig2, clear_figure=True)
 
 dr = driver_df.groupby('driverRef').agg(n_wins=('wins', 'sum'),

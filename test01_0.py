@@ -40,25 +40,18 @@ top3driv = ['max_verstappen', 'leclerc', 'hamilton']
 
 results['position'] = results['position'].apply(pd.to_numeric, errors='coerce')
 
-driver_df = results.loc[:, ['raceId', 'driverId', 'laps', 'fastestLapTime', 'positionOrder', 'position', 'points']]\
+driver_df = results.loc[:, ['raceId', 'driverId', 'laps', 'fastestLapTime', 'positionOrder']]\
+                        .merge(driver_standings.loc[:, ['raceId', 'driverId', 'points', 'position']], on=['raceId', 'driverId'])\
                         .merge(drivers.loc[:, ['driverId', 'driverRef']], on='driverId')\
                         .merge(races.loc[:, ['raceId', 'year', 'circuitId']], on='raceId')\
                         .merge(circuits.loc[:, ['circuitId', 'location']], on='circuitId')\
                         .merge(qualifying.loc[:, ['raceId', 'driverId', 'position']], 
-                               on=['raceId', 'driverId'], how='left', suffixes=('_quali', '_championship'))\
+                               on=['raceId', 'driverId'], how='left', suffixes=('_championship', '_quali'))\
                         .drop(['driverId', 'circuitId'], axis=1)
-
 driver_df.loc[:, 'fastestLapTime'] = [timeConverter(x) for x in driver_df['fastestLapTime']]
 
-#data = st.sidebar.radio(
-#    "Settore:",
-#    ('Piloti', 'Costruttori', 'Circuiti'))
 
-#a = st.sidebar.radio('Eventi per anno?', 
-#                ('Totale vittorie', 'Piazzamento medio gara', 'Piazzamento medio qualifiche'),
-#                )
-
-anno = st.sidebar.slider('Seleziona stagione', driver_df.year.min(), driver_df.year.max())
+anno = st.sidebar.slider('Seleziona stagione', driver_df.year.min(), driver_df.year.max(), 2022)
 
 driver_df.loc[:, 'poles'] = [1 if x==1 else 0 for x in driver_df['position_quali']]
 driver_df.loc[:, 'wins'] = [1 if x==1 else 0 for x in driver_df['positionOrder']]
@@ -105,13 +98,34 @@ axes.tick_params(axis='y', colors='w')
 axes.set_xlim(18,0)
 axes.set_xlim(18,0)
 
-
 for i,nome in enumerate(d_avg.driverRef):
     plt.annotate(nome, (d_avg.avg_race_placement[i]-.7, d_avg.avg_quali_placement[i]+.1), color='w')
 
 st.pyplot(fig=fig, clear_figure=True)
 
+d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
 
+fig2, axes = plt.subplots(figsize=(20,10))
+w = d_gr.loc[d_gr['year']==2021]
+palette = sns.color_palette('rocket_r', n_colors=30)
+
+for i,pil in enumerate(w.driverRef.unique()):
+    k = w.loc[w['driverRef']==pil]
+    axes.plot(k.raceId, k.position_championship, label=pil, 
+              linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
+    plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
+
+axes.set_facecolor('k')
+fig2.set_facecolor('k')
+axes.xaxis.grid(linewidth=.5)
+axes.invert_yaxis()
+axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
+
+axes.xaxis.label.set_color('w')
+axes.yaxis.label.set_color('w')
+axes.tick_params(axis='y', colors='w')
+
+st.pyplot(fig=fig2, clear_figure=True)
 
 dr = driver_df.groupby('driverRef').agg(n_wins=('wins', 'sum'),
                                         n_poles=('poles', 'sum'),

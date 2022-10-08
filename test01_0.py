@@ -81,56 +81,66 @@ d_avg = d.loc[(d['year']==anno) & (d['tot_races']>10)].groupby('driverRef').sum(
 
 st.header('Rapporto tra la media dei piazzamenti in qualifica e in gara per pilota e stagione')
 st.write('dati disponibili a partire dal 1967')
-fig, axes = plt.subplots()
-sns.scatterplot(ax=axes, data=d_avg[['driverRef', 'avg_race_placement', 'avg_quali_placement']],
-           x='avg_race_placement', y='avg_quali_placement', hue='driverRef', s=250, legend=False)
-axes.plot([0,20], [0,20], c='w', linewidth=1, linestyle='dotted')
 
-axes.set_facecolor('k')
-fig.set_facecolor('k')
-axes.yaxis.grid(linewidth=.2)
-axes.yaxis.grid(linewidth=.2)
-axes.invert_xaxis()
-axes.invert_yaxis()
-axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
+if int(d_avg[['avg_quali_placement']].sum()) > 5:
+    fig, axes = plt.subplots()
+    sns.scatterplot(ax=axes, data=d_avg[['driverRef', 'avg_race_placement', 'avg_quali_placement']],
+            x='avg_race_placement', y='avg_quali_placement', hue='driverRef', s=250, legend=False)
+    axes.plot([0,20], [0,20], c='w', linewidth=1, linestyle='dotted')
 
-axes.xaxis.label.set_color('w')
-axes.yaxis.label.set_color('w')
-axes.tick_params(axis='x', colors='w')
-axes.tick_params(axis='y', colors='w')
-
-axes.set_xlim(18,0)
-axes.set_xlim(18,0)
-
-for i,nome in enumerate(d_avg.driverRef):
-    plt.annotate(nome, (d_avg.avg_race_placement[i]-.7, d_avg.avg_quali_placement[i]+.1), color='w')
-
-st.pyplot(fig=fig, clear_figure=True)
-
-st.header('andamento stagionale della classifica')
-d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
-
-fig2, axes = plt.subplots(figsize=(20,10))
-w = d_gr.loc[d_gr['year']==anno]
-palette = sns.color_palette('rocket_r', n_colors=30)
-
-for i,pil in enumerate(w.driverRef.unique()):
-    k = w.loc[w['driverRef']==pil]
-    axes.plot(k.raceId, k.position_championship, label=pil, 
-            linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
-    plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
-try:
     axes.set_facecolor('k')
-    fig2.set_facecolor('k')
-    axes.xaxis.grid(linewidth=.5)
+    fig.set_facecolor('k')
+    axes.yaxis.grid(linewidth=.2)
+    axes.yaxis.grid(linewidth=.2)
+    axes.invert_xaxis()
     axes.invert_yaxis()
     axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
 
     axes.xaxis.label.set_color('w')
     axes.yaxis.label.set_color('w')
+    axes.tick_params(axis='x', colors='w')
     axes.tick_params(axis='y', colors='w')
-except:
+
+    axes.set_xlim(18,0)
+    axes.set_xlim(18,0)
+
+    for i,nome in enumerate(d_avg.driverRef):
+        plt.annotate(nome, (d_avg.avg_race_placement[i]-.7, d_avg.avg_quali_placement[i]+.1), color='w')
+
+    st.pyplot(fig=fig, clear_figure=True)
+
+else:
     st.error(err, icon=None)
+
+
+
+st.header('andamento stagionale della classifica')
+
+d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
+j = d_gr.groupby(['driverRef', 'year']).count().reset_index()
+j = list(j[j['position_championship']>5].driverRef.unique())
+
+d_gr = d_gr[d_gr['driverRef'].isin(j)]
+
+fig2, axes = plt.subplots(figsize=(20,10))
+w = d_gr.loc[d_gr['year']==anno]
+palette = sns.color_palette('rocket_r', n_colors=50)
+
+for i,pil in enumerate(w.driverRef.unique()):
+    k = w.loc[w['driverRef']==pil]
+    axes.plot(k.raceId, k.position_championship, label=pil, 
+              linewidth=((1/int(k.position_championship[-1:])*10)), c=palette[i])
+    plt.annotate(pil, (k.raceId[-1:], k.position_championship[-1:]), color=palette[i])
+
+axes.set_facecolor('k')
+fig2.set_facecolor('k')
+axes.xaxis.grid(linewidth=.5)
+axes.invert_yaxis()
+axes.spines[['top', 'bottom', 'right', 'left']].set_visible(False)
+
+axes.xaxis.label.set_color('w')
+axes.yaxis.label.set_color('w')
+axes.tick_params(axis='y', colors='w')
 
 
 st.pyplot(fig=fig2, clear_figure=True)

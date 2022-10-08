@@ -66,7 +66,10 @@ d = driver_df.groupby(['driverRef', 'year']).agg(n_wins=('wins', 'sum'),
 
 d_wq = d.loc[(d['year']==anno) & ((d['n_wins']>0) | (d['n_poles']>0))].groupby('driverRef').sum()#.reset_index()
 st.header('Totale vittorie e pole positions per pilota e stagione')
-st.bar_chart(d_wq[['n_wins', 'n_poles']])
+try:
+    st.bar_chart(d_wq[['n_wins', 'n_poles']])
+except:
+    st.write('non disponibile per questa stagione :(')
 
 d_avg = d.loc[(d['year']==anno)].groupby('driverRef').sum()#.reset_index()
 
@@ -101,7 +104,11 @@ axes.set_xlim(18,0)
 for i,nome in enumerate(d_avg.driverRef):
     plt.annotate(nome, (d_avg.avg_race_placement[i]-.7, d_avg.avg_quali_placement[i]+.1), color='w')
 
-st.pyplot(fig=fig, clear_figure=True)
+try:
+    st.pyplot(fig=fig, clear_figure=True)
+except:
+    st.write('non disponibile per questa stagione :(')
+
 
 d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
 
@@ -126,7 +133,11 @@ axes.yaxis.label.set_color('w')
 axes.tick_params(axis='y', colors='w')
 
 st.header('andamento stagionale della classifica')
-st.pyplot(fig=fig2, clear_figure=True)
+try:
+    st.pyplot(fig=fig2, clear_figure=True)
+except:
+    st.write('non disponibile per questa stagione :(')
+
 
 dr = driver_df.groupby('driverRef').agg(n_wins=('wins', 'sum'),
                                         n_poles=('poles', 'sum'),

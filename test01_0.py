@@ -106,7 +106,7 @@ st.pyplot(fig=fig, clear_figure=True)
 d_gr = driver_df.loc[:, ['raceId', 'driverRef', 'year', 'position_championship']].groupby(['raceId', 'driverRef']).max().reset_index()
 
 fig2, axes = plt.subplots(figsize=(20,10))
-w = d_gr.loc[d_gr['year']==2021]
+w = d_gr.loc[d_gr['year']==anno]
 palette = sns.color_palette('rocket_r', n_colors=30)
 
 for i,pil in enumerate(w.driverRef.unique()):
